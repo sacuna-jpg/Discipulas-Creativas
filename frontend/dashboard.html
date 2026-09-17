@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Progreso - Discípulas Creativas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">D</span>
+      <span>Discípulas Creativas</span>
+    </a>
+  </div>
+</header>
+
+<main>
+  <!-- Dashboard del Curso -->
+  <div id="courses-dashboard">
+    <div class="yt-header-bar">
+      <div class="yt-user-info">
+        <strong id="yt-modules-greeting">Hola, Hermana</strong>
+        <span class="yt-user-meta" id="yt-user-meta">Cargando distrito e iglesia...</span>
+      </div>
+      <div class="yt-logout-wrapper">
+        <button id="yt-logout-btn" class="yt-logout-btn">Cerrar Sesión</button>
+      </div>
+    </div>
+
+    <div class="yt-progress-section">
+      <div class="yt-progress-info">
+        <span>Progreso de certificación: <strong id="yt-progress-text">0 de 11 módulos</strong></span>
+        <strong id="yt-progress-percent">0%</strong>
+      </div>
+      <div class="yt-progress-bar">
+        <div class="yt-progress-fill" id="yt-progress-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <div class="yt-banner-done" id="yt-banner-done" style="display:none;">
+      <strong>🎉 ¡Felicidades! Completaste los 11 módulos del seminario.</strong>
+      <p>Tu certificación del Ministerio de la Mujer de AsoSurAndina está lista para ser procesada por tu coordinadora de iglesia.</p>
+    </div>
+
+    <div class="yt-grid">
+      <!-- Columna Principal (Reproductor de Video e Información) -->
+      <div class="yt-player-col">
+        <div class="yt-player-wrapper">
+          <iframe id="yt-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="yt-active-meta">
+          <div class="yt-active-title-row">
+            <h3 id="yt-active-title" class="yt-active-title">Cargando módulo...</h3>
+            <button id="yt-toggle-complete-btn" class="yt-complete-btn">
+              <span class="check-icon">✓</span> <span id="yt-complete-btn-text">Marcar como visto</span>
+            </button>
+          </div>
+          <p id="yt-active-desc" class="yt-active-desc">Selecciona un video de la lista para comenzar a aprender.</p>
+        </div>
+      </div>
+
+      <!-- Columna Lateral (Lista de Reproducción / Playlist) -->
+      <div class="yt-playlist-col">
+        <div class="yt-playlist-header">
+          <h4>Contenido del Seminario</h4>
+          <span class="yt-playlist-subtitle">11 Videos interactivos</span>
+        </div>
+        <div class="yt-playlist-items" id="yt-playlist-items">
+          <!-- Renderizado dinámico de los módulos -->
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>AsoSurAndina · Ministerio de la Mujer · Asociación Sur Andina</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var VIDEOS = [
+    "GTAE-9enobE",
+    "BVfEVHRgN80",
+    "PiXd2b528zU",
+    "dM_hH9MyGUM",
+    "ZTivyeO5IBU",
+    "XrkzVxZZID8",
+    "k_rTSxdcMcs",
+    "h8kU7DcH3Wg",
+    "prVqmEdsEis",
+    "9uL8y1vanWk",
+    "Ib2aRTIPCIM"
+  ];
+  var TOTAL = VIDEOS.length;
+
+  var state = { nombre:'', correo:'', distrito:'', iglesia:'', password:'', completados:[], activeVideoIndex: 0 };
+
+  var MODULE_DETAILS = [
+    { title: "Módulo 1: Introducción", desc: "Bienvenida al seminario de Discípulas Creativas. Conoce el propósito del curso y los pilares del discipulado creativo." },
+    { title: "Módulo 2: Tu Identidad Creativa", desc: "Descubre tus talentos y dones creativos dados por Dios para bendecir a tu congregación y comunidad." },
+    { title: "Módulo 3: El Poder del Testimonio", desc: "Cómo compartir tu historia y las maravillas de Dios a través de herramientas y formatos creativos." },
+    { title: "Módulo 4: Comunidades de Gracia", desc: "El papel del discipulado en grupo y cómo fomentar un ambiente de amor, creatividad and fe en tu iglesia." },
+    { title: "Módulo 5: Redes que Conectan", desc: "Aprende a usar los medios y la comunicación digital con un propósito eterno y un alcance de discipulado." },
+    { title: "Módulo 6: Espacios que Inspiran", desc: "Ideas prácticas para embellecer y organizar los lugares de reunión y eventos del Ministerio de la Mujer." },
+    { title: "Módulo 7: Oración Creativa", desc: "Explora diarios de oración, diarios bíblicos (Bible Journaling) y métodos dinámicos de devoción personal." },
+    { title: "Módulo 8: El Arte de Servir", desc: "Planificación de proyectos de servicio comunitario que marquen la diferencia e impacten vidas positivamente." },
+    { title: "Módulo 9: Palabras de Aliento", desc: "La escritura, las tarjetas de ánimo y la literatura como puente para alcanzar corazones para Cristo." },
+    { title: "Módulo 10: Eventos con Propósito", desc: "Cómo configurar programas, retiros y seminarios creativos que unan a las hermanas en comunión." },
+    { title: "Módulo 11: Graduación y Compromiso", desc: "Conclusión de tu certificación, compromiso de discipulado creativo y próximos pasos para brillar en tu iglesia." }
+  ];
+
+  function renderDashboard() {
+    document.getElementById('yt-modules-greeting').textContent = "¡Hola, " + state.nombre + "!";
+    document.getElementById('yt-user-meta').textContent = "Distrito: " + state.distrito + " · Iglesia: " + state.iglesia;
+
+    var count = state.completados.length;
+    document.getElementById('yt-progress-text').textContent = count + " de " + TOTAL + " módulos";
+    document.getElementById('yt-progress-percent').textContent = Math.round((count / TOTAL) * 100) + "%";
+    document.getElementById('yt-progress-fill').style.width = Math.round((count / TOTAL) * 100) + "%";
+
+    document.getElementById('yt-banner-done').style.display = (count >= TOTAL ? "block" : "none");
+
+    var videoId = VIDEOS[state.activeVideoIndex];
+    var iframe = document.getElementById('yt-iframe');
+    if (!iframe.src || !iframe.src.includes(videoId)) {
+      iframe.src = 'https://www.youtube.com/embed/' + videoId + '?rel=0';
+    }
+
+    document.getElementById('yt-active-title').textContent = MODULE_DETAILS[state.activeVideoIndex].title;
+    document.getElementById('yt-active-desc').textContent = MODULE_DETAILS[state.activeVideoIndex].desc;
+
+    var isDone = state.completados.indexOf(state.activeVideoIndex + 1) !== -1;
+    var completeBtn = document.getElementById('yt-toggle-complete-btn');
+    var completeText = document.getElementById('yt-complete-btn-text');
+    if (isDone) {
+      completeBtn.classList.add('completed');
+      completeText.textContent = 'Completado';
+    } else {
+      completeBtn.classList.remove('completed');
+      completeText.textContent = 'Marcar como visto';
+    }
+
+    var playlistItems = document.getElementById('yt-playlist-items');
+    playlistItems.innerHTML = '';
+    MODULE_DETAILS.forEach(function(mod, i) {
+      var n = i + 1;
+      var isCurrent = (i === state.activeVideoIndex);
+      var isDone = state.completados.indexOf(n) !== -1;
+
+      var item = document.createElement('div');
+      item.className = 'yt-playlist-item' + (isCurrent ? ' active' : '');
+      item.innerHTML =
+        '<div class="yt-item-num">' + (isCurrent ? '▶' : (n < 10 ? '0' + n : n)) + '</div>' +
+        '<div class="yt-item-info">' +
+          '<div class="yt-item-title">' + mod.title + '</div>' +
+          '<div class="yt-item-duration">Seminario en Video</div>' +
+        '</div>' +
+        '<div class="yt-item-status">' +
+          (isDone ? '<div class="yt-badge-complete">✓</div>' : '') +
+        '</div>';
+
+      item.addEventListener('click', function() {
+        state.activeVideoIndex = i;
+        renderDashboard();
+      });
+
+      playlistItems.appendChild(item);
+    });
+  }
+
+  function selectFirstIncomplete() {
+    var firstIncomplete = 0;
+    for (var idx = 0; idx < TOTAL; idx++) {
+      if (state.completados.indexOf(idx + 1) === -1) {
+        firstIncomplete = idx;
+        break;
+      }
+    }
+    state.activeVideoIndex = firstIncomplete;
+  }
+
+  function persist(){
+    try{
+      if (state.correo) {
+        var userKey = 'dc-user-' + state.correo.toLowerCase();
+        var userData = {
+          nombre: state.nombre,
+          correo: state.correo,
+          distrito: state.distrito,
+          iglesia: state.iglesia,
+          password: state.password,
+          completados: state.completados,
+          actualizadoEn: new Date().toISOString()
+        };
+        localStorage.setItem(userKey, JSON.stringify(userData));
+        localStorage.setItem('dc-active-session', state.correo);
+      }
+    }catch(err){}
+  }
+
+  var toggleCompleteBtn = document.getElementById('yt-toggle-complete-btn');
+  toggleCompleteBtn.addEventListener('click', function() {
+    var n = state.activeVideoIndex + 1;
+    var idx = state.completados.indexOf(n);
+    if (idx === -1) {
+      state.completados.push(n);
+    } else {
+      state.completados.splice(idx, 1);
+    }
+    persist();
+    renderDashboard();
+  });
+
+  var ytLogoutBtn = document.getElementById('yt-logout-btn');
+  ytLogoutBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    try {
+      localStorage.removeItem('dc-active-session');
+    } catch(err){}
+    window.location.href = 'index.html';
+  });
+
+  // Validar y restaurar sesión activa al cargar la página
+  try {
+    var activeEmail = localStorage.getItem('dc-active-session');
+    if (activeEmail) {
+      var rawUser = localStorage.getItem('dc-user-' + activeEmail.toLowerCase());
+      if (rawUser) {
+        var user = JSON.parse(rawUser);
+        state.nombre = user.nombre;
+        state.correo = user.correo;
+        state.distrito = user.distrito;
+        state.iglesia = user.iglesia;
+        state.password = user.password;
+        state.completados = Array.isArray(user.completados) ? user.completados : [];
+
+        selectFirstIncomplete();
+        renderDashboard();
+      } else {
+        window.location.href = 'index.html';
+      }
+    } else {
+      window.location.href = 'index.html';
+    }
+  } catch(err){
+    window.location.href = 'index.html';
+  }
+
+})();
+</script>
+
+</body>
+</html>
