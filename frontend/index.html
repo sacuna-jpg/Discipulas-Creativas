@@ -1,4 +1,9 @@
-<title>Discípulas Creativas</title>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discípulas Creativas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -300,7 +305,85 @@
     html{scroll-behavior:auto;}
     *{transition:none !important;}
   }
+
+  /* ---------- modal de video ---------- */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(42, 15, 31, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+  }
+  .modal-content {
+    position: relative;
+    width: 95%;
+    max-width: 1000px;
+    background: var(--paper-card);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+  }
+  .modal-overlay.active .modal-content {
+    transform: scale(1);
+  }
+  .video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+  }
+  .video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  .modal-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(58, 31, 62, 0.85); /* Ciruela profundo translúcido */
+    color: #FFFFFF;
+    font-size: 26px;
+    font-family: inherit;
+    line-height: 1;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    z-index: 2100; /* Flota sobre el iframe */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  }
+  .modal-close-btn:hover {
+    background-color: var(--pink);
+    border-color: #FFFFFF;
+    transform: scale(1.1);
+    color: #FFFFFF;
+  }
 </style>
+</head>
+<body>
 
 <header>
   <div class="header-inner">
@@ -417,32 +500,63 @@
 
     <div class="register-wrap">
       <div class="register-copy" id="register-copy">
-        <h3 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:4px;">¿Cómo te llamas?</h3>
-        <p>Escribe tu nombre y elige tu distrito e iglesia para entrar al camino. No necesitas correo ni contraseña — si vuelves después, entra con el mismo nombre, distrito e iglesia para continuar donde lo dejaste.</p>
+        <h3 id="copy-title" style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:4px;">¡Bienvenida!</h3>
+        <p id="copy-desc">Inicia sesión con tu correo y contraseña para ver tu avance en el seminario. Si es tu primera vez, haz clic en registrarse para crear tu cuenta.</p>
       </div>
 
       <div class="card" id="register-card">
-        <form id="entry-form">
-          <div id="form-fields">
-            <div class="field">
-              <label for="nombre">Tu nombre de usuario</label>
-              <input id="nombre" name="nombre" type="text" autocomplete="name" required placeholder="Ej. María Fernanda">
-            </div>
-            <div class="field">
-              <label for="distrito">Tu distrito</label>
-              <select id="distrito" name="distrito" required>
-                <option value="" disabled selected>Selecciona tu distrito…</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="iglesia">Tu iglesia o grupo</label>
-              <select id="iglesia" name="iglesia" required disabled>
-                <option value="" disabled selected>Primero elige tu distrito…</option>
-              </select>
-            </div>
-            <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;">Entrar</button>
-            <p class="form-note">Al entrar, tu nombre, distrito e iglesia se guardan en este dispositivo para que puedas continuar el camino más adelante desde el mismo navegador.</p>
+        <!-- Formulario de Login -->
+        <form id="login-form">
+          <div class="field">
+            <label for="login-correo">Correo electrónico</label>
+            <input id="login-correo" name="correo" type="email" autocomplete="email" required placeholder="Ej. maria@correo.com">
           </div>
+          <div class="field">
+            <label for="login-password">Contraseña</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Tu contraseña">
+          </div>
+          <div id="login-error" style="color:#d6549a; font-size:13.5px; margin-bottom:14px; font-weight:600; display:none;"></div>
+          <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;">Iniciar Sesión</button>
+          <p style="text-align:center; margin-top:18px; font-size:14px; color:var(--ink-soft);">
+            ¿No tienes un usuario? <a href="#" id="to-register" style="color:var(--pink); font-weight:700; text-decoration:none;">Regístrate</a>
+          </p>
+        </form>
+
+        <!-- Formulario de Registro -->
+        <form id="register-form" style="display:none;">
+          <div class="field">
+            <label for="reg-username">Nombre de usuario</label>
+            <input id="reg-username" name="username" type="text" autocomplete="username" required placeholder="Ej. María Fernanda">
+          </div>
+          <div class="field">
+            <label for="reg-correo">Correo electrónico</label>
+            <input id="reg-correo" name="correo" type="email" autocomplete="email" required placeholder="Ej. maria@correo.com">
+          </div>
+          <div class="field">
+            <label for="reg-password">Contraseña</label>
+            <input id="reg-password" name="password" type="password" autocomplete="new-password" required placeholder="Crea una contraseña">
+          </div>
+          <div class="field">
+            <label for="reg-password-confirm">Confirmar contraseña</label>
+            <input id="reg-password-confirm" name="password_confirm" type="password" autocomplete="new-password" required placeholder="Repite tu contraseña">
+          </div>
+          <div class="field">
+            <label for="distrito">Tu distrito</label>
+            <select id="distrito" name="distrito" required>
+              <option value="" disabled selected>Selecciona tu distrito…</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="iglesia">Tu iglesia o grupo</label>
+            <select id="iglesia" name="iglesia" required disabled>
+              <option value="" disabled selected>Primero elige tu distrito…</option>
+            </select>
+          </div>
+          <div id="register-error" style="color:#d6549a; font-size:13.5px; margin-bottom:14px; font-weight:600; display:none;"></div>
+          <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;">Registrarse</button>
+          <p style="text-align:center; margin-top:18px; font-size:14px; color:var(--ink-soft);">
+            ¿Ya tienes una cuenta? <a href="#" id="to-login" style="color:var(--pink); font-weight:700; text-decoration:none;">Volver al login</a>
+          </p>
         </form>
 
         <div id="modules-block" style="display:none;">
@@ -506,6 +620,16 @@
     </div>
   </div>
 </footer>
+
+  <!-- Modal de Video Embebido -->
+  <div id="video-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <button id="modal-close" class="modal-close-btn">&times;</button>
+      <div class="video-container">
+        <iframe id="modal-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
 
 <script>
 (function(){
@@ -573,15 +697,44 @@
       .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
   }
 
-  var form = document.getElementById('entry-form');
+  var loginForm = document.getElementById('login-form');
+  var registerForm = document.getElementById('register-form');
   var registerCopy = document.getElementById('register-copy');
+  var copyTitle = document.getElementById('copy-title');
+  var copyDesc = document.getElementById('copy-desc');
+  var toRegisterBtn = document.getElementById('to-register');
+  var toLoginBtn = document.getElementById('to-login');
+  var loginError = document.getElementById('login-error');
+  var registerError = document.getElementById('register-error');
+
   var modulesBlock = document.getElementById('modules-block');
   var moduleRows = document.getElementById('module-rows');
   var progressFill = document.getElementById('progress-fill');
   var progressCount = document.getElementById('progress-count');
   var bannerDone = document.getElementById('banner-done');
 
-  var state = { nombre:'', distrito:'', iglesia:'', slug:'', completados:[] };
+  var state = { nombre:'', correo:'', distrito:'', iglesia:'', password:'', slug:'', completados:[] };
+
+  // Alternancia entre formularios
+  toRegisterBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'block';
+    copyTitle.textContent = 'Regístrate en la plataforma';
+    copyDesc.textContent = 'Crea tu usuario, ingresa tu correo electrónico y selecciona tu distrito e iglesia para comenzar el seminario de Discípulas Creativas.';
+    loginError.style.display = 'none';
+    registerError.style.display = 'none';
+  });
+
+  toLoginBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    registerForm.style.display = 'none';
+    loginForm.style.display = 'block';
+    copyTitle.textContent = '¡Bienvenida!';
+    copyDesc.textContent = 'Inicia sesión con tu correo y contraseña para ver tu avance en el seminario. Si es tu primera vez, haz clic en registrarse para crear tu cuenta.';
+    loginError.style.display = 'none';
+    registerError.style.display = 'none';
+  });
 
   function buildRows(){
     moduleRows.innerHTML = '';
@@ -599,10 +752,9 @@
           '<svg class="module-chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
         '</div>' +
         '<div class="module-body">' +
-          '<a class="video-link" href="https://www.youtube.com/watch?v=' + videoId + '" target="_blank" rel="noopener">' +
+          '<a class="video-link" href="https://www.youtube.com/watch?v=' + videoId + '" rel="noopener">' +
             '<span class="play-circle"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4l14 8-14 8V4z" fill="#2A0F1F"/></svg></span>' +
-            '<span class="video-link-text"><strong>Ver video del módulo ' + n + '</strong><span>Se abre en YouTube, en una pestaña nueva</span></span>' +
-            '<svg class="external-icon" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '<span class="video-link-text"><strong>Ver video del módulo ' + n + '</strong><span>Se reproduce en la página</span></span>' +
           '</a>' +
           '<button type="button" class="mark-btn' + (done ? ' is-done' : '') + '" data-mark="' + n + '">' + (done ? '✓ Marcado como visto' : 'Marcar como visto') + '</button>' +
         '</div>';
@@ -628,17 +780,34 @@
 
   function persist(){
     try{
-      localStorage.setItem('dc-progreso-' + state.slug, JSON.stringify({
-        nombre: state.nombre,
-        distrito: state.distrito,
-        iglesia: state.iglesia,
-        completados: state.completados,
-        actualizadoEn: new Date().toISOString()
-      }));
+      if (state.correo) {
+        var userKey = 'dc-user-' + state.correo.toLowerCase();
+        var userData = {
+          nombre: state.nombre,
+          correo: state.correo,
+          distrito: state.distrito,
+          iglesia: state.iglesia,
+          password: state.password,
+          completados: state.completados,
+          actualizadoEn: new Date().toISOString()
+        };
+        localStorage.setItem(userKey, JSON.stringify(userData));
+        localStorage.setItem('dc-active-session', state.correo);
+      }
     }catch(err){}
   }
 
   moduleRows.addEventListener('click', function(e){
+    var videoLink = e.target.closest('.video-link');
+    if (videoLink) {
+      e.preventDefault();
+      var href = videoLink.getAttribute('href');
+      var videoId = href.split('v=')[1];
+      if (videoId) {
+        openVideoModal(videoId);
+      }
+      return;
+    }
     var head = e.target.closest('[data-toggle]');
     if (head){
       var row = head.closest('.module-row');
@@ -659,51 +828,181 @@
     }
   });
 
-  form.addEventListener('submit', function(e){
+  // Envío del Formulario de Registro
+  registerForm.addEventListener('submit', function(e){
     e.preventDefault();
-    var nombre = document.getElementById('nombre').value.trim();
-    var distrito = document.getElementById('distrito').value;
-    var iglesia = document.getElementById('iglesia').value;
-    if (!nombre || !distrito || !iglesia) return;
+    registerError.style.display = 'none';
+
+    var nombre = document.getElementById('reg-username').value.trim();
+    var correo = document.getElementById('reg-correo').value.trim().toLowerCase();
+    var password = document.getElementById('reg-password').value;
+    var passwordConfirm = document.getElementById('reg-password-confirm').value;
+    var distrito = distritoSelect.value;
+    var iglesia = iglesiaSelect.value;
+
+    if (!nombre || !correo || !password || !passwordConfirm || !distrito || !iglesia) {
+      registerError.textContent = 'Todos los campos son obligatorios.';
+      registerError.style.display = 'block';
+      return;
+    }
+
+    if (password !== passwordConfirm) {
+      registerError.textContent = 'Las contraseñas no coinciden.';
+      registerError.style.display = 'block';
+      return;
+    }
+
+    // Verificar si el correo ya existe
+    try {
+      var existing = localStorage.getItem('dc-user-' + correo);
+      if (existing) {
+        registerError.textContent = 'Este correo electrónico ya está registrado.';
+        registerError.style.display = 'block';
+        return;
+      }
+    } catch(err){}
 
     state.nombre = nombre;
+    state.correo = correo;
     state.distrito = distrito;
     state.iglesia = iglesia;
+    state.password = password;
     state.slug = slugify(nombre) + '--' + slugify(distrito) + '--' + slugify(iglesia);
+    state.completados = [];
 
-    try{
-      localStorage.setItem('dc-nombre', nombre);
-      localStorage.setItem('dc-distrito', distrito);
-      localStorage.setItem('dc-iglesia', iglesia);
-    }catch(err){}
+    persist();
 
-    var saved = null;
-    try{
-      var raw = localStorage.getItem('dc-progreso-' + state.slug);
-      if (raw) saved = JSON.parse(raw);
-    }catch(err){}
-    state.completados = (saved && Array.isArray(saved.completados)) ? saved.completados.slice() : [];
-
-    document.getElementById('form-fields').style.display = 'none';
-    registerCopy.querySelector('p').textContent = 'Sigue tu camino más abajo. Cuando termines un video, márcalo como visto.';
+    // Ocultar formulario de registro y mostrar módulos
+    registerForm.style.display = 'none';
+    registerCopy.style.display = 'none'; // ocultar textos para hacer espacio
     document.getElementById('modules-greeting').textContent = 'Hola, ' + nombre;
     modulesBlock.style.display = 'block';
     buildRows();
     refreshProgress();
-    persist();
   });
 
-  try{
-    var savedNombre = localStorage.getItem('dc-nombre');
-    var savedDistrito = localStorage.getItem('dc-distrito');
-    var savedIglesia = localStorage.getItem('dc-iglesia');
-    if (savedNombre) document.getElementById('nombre').value = savedNombre;
-    if (savedDistrito && DISTRITOS[savedDistrito]){
-      distritoSelect.value = savedDistrito;
-      distritoSelect.dispatchEvent(new Event('change'));
-      if (savedIglesia) iglesiaSelect.value = savedIglesia;
+  // Envío del Formulario de Login
+  loginForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    loginError.style.display = 'none';
+
+    var correo = document.getElementById('login-correo').value.trim().toLowerCase();
+    var password = document.getElementById('login-password').value;
+
+    if (!correo || !password) {
+      loginError.textContent = 'Por favor ingresa tu correo y contraseña.';
+      loginError.style.display = 'block';
+      return;
     }
-  }catch(err){}
+
+    var userData = null;
+    try {
+      var raw = localStorage.getItem('dc-user-' + correo);
+      if (raw) userData = JSON.parse(raw);
+    } catch(err){}
+
+    if (!userData || userData.password !== password) {
+      loginError.textContent = 'El correo electrónico o la contraseña son incorrectos.';
+      loginError.style.display = 'block';
+      return;
+    }
+
+    state.nombre = userData.nombre;
+    state.correo = userData.correo;
+    state.distrito = userData.distrito;
+    state.iglesia = userData.iglesia;
+    state.password = userData.password;
+    state.slug = slugify(userData.nombre) + '--' + slugify(userData.distrito) + '--' + slugify(userData.iglesia);
+    state.completados = Array.isArray(userData.completados) ? userData.completados : [];
+
+    // Guardar sesión activa
+    try {
+      localStorage.setItem('dc-active-session', correo);
+    } catch(err){}
+
+    // Ocultar formulario de login y mostrar módulos
+    loginForm.style.display = 'none';
+    registerCopy.style.display = 'none'; // ocultar textos para hacer espacio
+    document.getElementById('modules-greeting').textContent = 'Hola, ' + userData.nombre;
+    modulesBlock.style.display = 'block';
+    buildRows();
+    refreshProgress();
+  });
+
+  // Crear botón de cerrar sesión dinámicamente
+  var logoutBtn = document.createElement('a');
+  logoutBtn.href = '#';
+  logoutBtn.textContent = 'Cerrar sesión';
+  logoutBtn.style.fontSize = '12px';
+  logoutBtn.style.color = 'var(--pink)';
+  logoutBtn.style.marginLeft = '12px';
+  logoutBtn.style.textDecoration = 'none';
+  logoutBtn.style.fontWeight = 'normal';
+  logoutBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    try {
+      localStorage.removeItem('dc-active-session');
+    } catch(err){}
+    window.location.reload();
+  });
+  document.getElementById('modules-greeting').after(logoutBtn);
+
+  // Intentar restaurar sesión activa al cargar la página
+  try {
+    var activeEmail = localStorage.getItem('dc-active-session');
+    if (activeEmail) {
+      var rawUser = localStorage.getItem('dc-user-' + activeEmail.toLowerCase());
+      if (rawUser) {
+        var user = JSON.parse(rawUser);
+        state.nombre = user.nombre;
+        state.correo = user.correo;
+        state.distrito = user.distrito;
+        state.iglesia = user.iglesia;
+        state.password = user.password;
+        state.slug = slugify(user.nombre) + '--' + slugify(user.distrito) + '--' + user.iglesia;
+        state.completados = Array.isArray(user.completados) ? user.completados : [];
+
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'none';
+        registerCopy.style.display = 'none';
+        document.getElementById('modules-greeting').textContent = 'Hola, ' + user.nombre;
+        modulesBlock.style.display = 'block';
+        buildRows();
+        refreshProgress();
+      }
+    }
+  } catch(err){}
+
+  // Lógica del modal de video embebido
+  var videoModal = document.getElementById('video-modal');
+  var modalIframe = document.getElementById('modal-iframe');
+  var modalClose = document.getElementById('modal-close');
+
+  function openVideoModal(videoId) {
+    modalIframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
+    videoModal.style.display = 'flex';
+    setTimeout(function(){
+      videoModal.classList.add('active');
+    }, 10);
+  }
+
+  function closeVideoModal() {
+    videoModal.classList.remove('active');
+    setTimeout(function(){
+      videoModal.style.display = 'none';
+      modalIframe.src = '';
+    }, 300);
+  }
+
+  modalClose.addEventListener('click', closeVideoModal);
+  videoModal.addEventListener('click', function(e){
+    if (e.target === videoModal) {
+      closeVideoModal();
+    }
+  });
 
 })();
 </script>
+
+</body>
+</html>
