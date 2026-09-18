@@ -62,6 +62,34 @@
           </div>
           <p id="yt-active-desc" class="yt-active-desc">Selecciona un video de la lista para comenzar a aprender.</p>
         </div>
+
+        <!-- Sección de Reflexión y Preguntas Mock -->
+        <div class="yt-reflection-card">
+          <div class="yt-reflection-header">
+            <h4 class="yt-reflection-title">Tu reflexión</h4>
+            <p class="yt-reflection-subtitle">Responde las preguntas de aplicación personal para consolidar lo aprendido en este video.</p>
+          </div>
+
+          <div class="yt-question-group">
+            <label id="yt-q1-label" class="yt-question-label">1. ¿A quién animé esta semana?</label>
+            <textarea id="yt-q1-input" class="yt-question-textarea" placeholder="Escribe aquí tu reflexión y experiencia..."></textarea>
+          </div>
+
+          <div class="yt-question-group">
+            <label id="yt-q2-label" class="yt-question-label">2. ¿Con quién me conecté a través de algo que compartí?</label>
+            <textarea id="yt-q2-input" class="yt-question-textarea" placeholder="Escribe aquí tu reflexión y experiencia..."></textarea>
+          </div>
+
+          <div class="yt-reflection-actions">
+            <button id="yt-save-progress-btn" class="yt-save-progress-btn">
+              <span class="check-icon">✓</span> Guardar progreso
+            </button>
+            <span id="yt-save-feedback" class="yt-save-feedback">✓ ¡Progreso y respuestas guardadas con éxito!</span>
+            <button id="yt-next-module-btn" class="yt-next-module-btn">
+              Siguiente módulo &rarr;
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Columna Lateral (Lista de Reproducción / Playlist) -->
@@ -101,7 +129,30 @@
   ];
   var TOTAL = VIDEOS.length;
 
-  var state = { nombre:'', correo:'', distrito:'', iglesia:'', password:'', completados:[], activeVideoIndex: 0 };
+  var QUESTIONS_MOCK = [
+    ["1. ¿A quién animé esta semana?", "2. ¿Con quién me conecté a través de algo que compartí?"],
+    ["1. ¿Qué don o talento creativo identifico que Dios me ha entregado?", "2. ¿Cómo puedo poner mi creatividad al servicio de una hermana necesitada?"],
+    ["1. ¿De qué manera puedo testificar del amor de Dios usando medios visuales o creativos?", "2. ¿A quién le contaré mi testimonio durante los próximos días?"],
+    ["1. ¿Cómo puedo contribuir a un ambiente de mayor gracia y amor en mi grupo pequeño?", "2. ¿Qué hermana nueva o desanimada puedo invitar a compartir un espacio de comunión?"],
+    ["1. ¿Qué mensaje positivo o bíblico puedo compartir hoy en mis redes o estados?", "2. ¿Con quién me conecté espiritualmente a través de un mensaje digital esta semana?"],
+    ["1. ¿Qué idea sencilla puedo aportar para embellecer el espacio de nuestro Ministerio de la Mujer?", "2. ¿Cómo podemos hacer que una visita se sienta cálidamente recibida en nuestra congregación?"],
+    ["1. ¿Qué experiencia especial viví en mi tiempo devocional u oración creativa?", "2. ¿Por qué hermana o petición específica estuve orando intensamente?"],
+    ["1. ¿Qué acto de servicio solidario puedo planear para bendecir a mi comunidad?", "2. ¿A quién pude servir con alegría esta semana sin esperar nada a cambio?"],
+    ["1. ¿A quién le envié o entregaré una nota de ánimo, tarjeta o versículo inspirador?", "2. ¿Cómo impactó una palabra de esperanza en la vida de una persona a mi alrededor?"],
+    ["1. ¿Qué temática o dinámica creativa me gustaría proponer para el próximo retiro o programa?", "2. ¿De qué forma fomentaremos la integración entre generaciones en nuestros eventos?"],
+    ["1. ¿Cuál ha sido la mayor bendición o lección aprendida a lo largo de este seminario?", "2. ¿Cuál es mi compromiso personal de discipulado creativo de aquí en adelante?"]
+  ];
+
+  var state = {
+    nombre: '',
+    correo: '',
+    distrito: '',
+    iglesia: '',
+    password: '',
+    completados: [],
+    respuestas: {},
+    activeVideoIndex: 0
+  };
 
   var MODULE_DETAILS = [
     { title: "Módulo 1: Introducción", desc: "Bienvenida al seminario de Discípulas Creativas. Conoce el propósito del curso y los pilares del discipulado creativo." },
@@ -137,7 +188,8 @@
     document.getElementById('yt-active-title').textContent = MODULE_DETAILS[state.activeVideoIndex].title;
     document.getElementById('yt-active-desc').textContent = MODULE_DETAILS[state.activeVideoIndex].desc;
 
-    var isDone = state.completados.indexOf(state.activeVideoIndex + 1) !== -1;
+    var modNum = state.activeVideoIndex + 1;
+    var isDone = state.completados.indexOf(modNum) !== -1;
     var completeBtn = document.getElementById('yt-toggle-complete-btn');
     var completeText = document.getElementById('yt-complete-btn-text');
     if (isDone) {
@@ -148,12 +200,33 @@
       completeText.textContent = 'Marcar como visto';
     }
 
+    // Renderizar preguntas mock del módulo activo
+    var questions = QUESTIONS_MOCK[state.activeVideoIndex] || [
+      "1. ¿A quién animé esta semana?",
+      "2. ¿Con quién me conecté a través de algo que compartí?"
+    ];
+    document.getElementById('yt-q1-label').textContent = questions[0];
+    document.getElementById('yt-q2-label').textContent = questions[1];
+
+    // Cargar respuestas guardadas previamente para este módulo si existen
+    var savedAnswers = state.respuestas[modNum] || ['', ''];
+    document.getElementById('yt-q1-input').value = savedAnswers[0] || '';
+    document.getElementById('yt-q2-input').value = savedAnswers[1] || '';
+
+    // Actualizar botón "Siguiente módulo"
+    var nextModuleBtn = document.getElementById('yt-next-module-btn');
+    if (state.activeVideoIndex >= TOTAL - 1) {
+      nextModuleBtn.style.display = 'none';
+    } else {
+      nextModuleBtn.style.display = 'inline-flex';
+    }
+
     var playlistItems = document.getElementById('yt-playlist-items');
     playlistItems.innerHTML = '';
     MODULE_DETAILS.forEach(function(mod, i) {
       var n = i + 1;
       var isCurrent = (i === state.activeVideoIndex);
-      var isDone = state.completados.indexOf(n) !== -1;
+      var itemDone = state.completados.indexOf(n) !== -1;
 
       var item = document.createElement('div');
       item.className = 'yt-playlist-item' + (isCurrent ? ' active' : '');
@@ -164,16 +237,30 @@
           '<div class="yt-item-duration">Seminario en Video</div>' +
         '</div>' +
         '<div class="yt-item-status">' +
-          (isDone ? '<div class="yt-badge-complete">✓</div>' : '') +
+          (itemDone ? '<div class="yt-badge-complete">✓</div>' : '') +
         '</div>';
 
       item.addEventListener('click', function() {
         state.activeVideoIndex = i;
         renderDashboard();
+        scrollToPlayer();
       });
 
       playlistItems.appendChild(item);
     });
+  }
+
+  function scrollToPlayer() {
+    var player = document.querySelector('.yt-player-col');
+    if (player) {
+      var headerOffset = 75; // Compensación por el header sticky
+      var elementPosition = player.getBoundingClientRect().top;
+      var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: 'smooth'
+      });
+    }
   }
 
   function selectFirstIncomplete() {
@@ -198,6 +285,7 @@
           iglesia: state.iglesia,
           password: state.password,
           completados: state.completados,
+          respuestas: state.respuestas,
           actualizadoEn: new Date().toISOString()
         };
         localStorage.setItem(userKey, JSON.stringify(userData));
@@ -206,6 +294,7 @@
     }catch(err){}
   }
 
+  // Botón superior simple "Marcar como visto"
   var toggleCompleteBtn = document.getElementById('yt-toggle-complete-btn');
   toggleCompleteBtn.addEventListener('click', function() {
     var n = state.activeVideoIndex + 1;
@@ -219,6 +308,41 @@
     renderDashboard();
   });
 
+  // Botón "Guardar progreso" (guarda respuestas de reflexión y marca visto)
+  var saveProgressBtn = document.getElementById('yt-save-progress-btn');
+  var saveFeedback = document.getElementById('yt-save-feedback');
+  saveProgressBtn.addEventListener('click', function() {
+    var modNum = state.activeVideoIndex + 1;
+    var ans1 = document.getElementById('yt-q1-input').value.trim();
+    var ans2 = document.getElementById('yt-q2-input').value.trim();
+
+    state.respuestas[modNum] = [ans1, ans2];
+
+    if (state.completados.indexOf(modNum) === -1) {
+      state.completados.push(modNum);
+    }
+
+    persist();
+    renderDashboard();
+
+    // Feedback visual
+    saveFeedback.style.display = 'inline-flex';
+    setTimeout(function() {
+      saveFeedback.style.display = 'none';
+    }, 3500);
+  });
+
+  // Botón "Siguiente módulo"
+  var nextModuleBtn = document.getElementById('yt-next-module-btn');
+  nextModuleBtn.addEventListener('click', function() {
+    if (state.activeVideoIndex < TOTAL - 1) {
+      state.activeVideoIndex++;
+      renderDashboard();
+      scrollToPlayer();
+    }
+  });
+
+  // Cerrar sesión
   var ytLogoutBtn = document.getElementById('yt-logout-btn');
   ytLogoutBtn.addEventListener('click', function(e) {
     e.preventDefault();
@@ -241,6 +365,7 @@
         state.iglesia = user.iglesia;
         state.password = user.password;
         state.completados = Array.isArray(user.completados) ? user.completados : [];
+        state.respuestas = (typeof user.respuestas === 'object' && user.respuestas !== null) ? user.respuestas : {};
 
         selectFirstIncomplete();
         renderDashboard();
