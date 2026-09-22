@@ -11,23 +11,23 @@ require_once __DIR__ . '/Logger.php';
 class Router {
     private array $routes = [];
 
-    public function get(string $path, array $handler, array $middlewares = []) {
+    public function get(string $path, $handler, array $middlewares = []) {
         $this->addRoute('GET', $path, $handler, $middlewares);
     }
 
-    public function post(string $path, array $handler, array $middlewares = []) {
+    public function post(string $path, $handler, array $middlewares = []) {
         $this->addRoute('POST', $path, $handler, $middlewares);
     }
 
-    public function put(string $path, array $handler, array $middlewares = []) {
+    public function put(string $path, $handler, array $middlewares = []) {
         $this->addRoute('PUT', $path, $handler, $middlewares);
     }
 
-    public function delete(string $path, array $handler, array $middlewares = []) {
+    public function delete(string $path, $handler, array $middlewares = []) {
         $this->addRoute('DELETE', $path, $handler, $middlewares);
     }
 
-    private function addRoute(string $method, string $path, array $handler, array $middlewares) {
+    private function addRoute(string $method, string $path, $handler, array $middlewares) {
         $normalizedPath = '/' . trim($path, '/');
         $this->routes[] = [
             'method'      => $method,

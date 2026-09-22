@@ -58,12 +58,12 @@ class AuthController {
         $password = $request->input('password', '');
 
         if (empty($correo) || empty($password)) {
-            Response::badRequest('Por favor ingresa tu correo y contraseña.', 'CREDENTIALS_REQUIRED');
+            Response::badRequest('Datos incorrectos, por favor revise.', 'CREDENTIALS_REQUIRED');
         }
 
         $usuario = Usuario::findByEmail($correo);
         if (!$usuario || !password_verify($password, $usuario['password_hash'])) {
-            Response::unauthorized('Correo o contraseña incorrectos.', 'INVALID_CREDENTIALS');
+            Response::unauthorized('Datos incorrectos, por favor revise.', 'INVALID_CREDENTIALS');
         }
 
         // Crear token en la tabla sesiones

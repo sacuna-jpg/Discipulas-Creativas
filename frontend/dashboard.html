@@ -27,7 +27,8 @@
         <strong id="yt-modules-greeting">Hola, Hermana</strong>
         <span class="yt-user-meta" id="yt-user-meta">Cargando distrito e iglesia...</span>
       </div>
-      <div class="yt-logout-wrapper">
+      <div class="yt-logout-wrapper" style="display:flex; gap:10px; align-items:center;">
+        <button id="yt-password-btn" class="yt-password-btn" title="Cambiar mi contraseña">🔑 Cambiar Contraseña</button>
         <button id="yt-logout-btn" class="yt-logout-btn">Cerrar Sesión</button>
       </div>
     </div>
@@ -112,84 +113,97 @@
   </div>
 </footer>
 
+  <!-- Modal Cambiar Contraseña -->
+  <div id="password-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content-card">
+      <button id="modal-pwd-close" class="modal-close-btn" aria-label="Cerrar modal">&times;</button>
+      <h3 style="margin-top:0; margin-bottom:8px; font-size:1.25rem;">🔑 Cambiar mi contraseña</h3>
+      <p style="font-size:13.5px; color:var(--ink-soft); margin-top:0; margin-bottom:20px;">
+        Ingresa tu contraseña actual y define una nueva clave de acceso seguro.
+      </p>
+      
+      <form id="password-change-form">
+        <div style="margin-bottom:14px;">
+          <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Contraseña actual</label>
+          <input type="password" id="pwd-actual" required placeholder="Tu contraseña actual" style="width:100%; box-sizing:border-box; padding:10px 14px; border:1px solid var(--line); border-radius:10px; background:var(--paper); color:var(--ink); font-size:14px;">
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Nueva contraseña (mínimo 6 caracteres)</label>
+          <input type="password" id="pwd-nueva" required minlength="6" placeholder="Nueva contraseña" style="width:100%; box-sizing:border-box; padding:10px 14px; border:1px solid var(--line); border-radius:10px; background:var(--paper); color:var(--ink); font-size:14px;">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Confirmar nueva contraseña</label>
+          <input type="password" id="pwd-confirm" required minlength="6" placeholder="Repite la nueva contraseña" style="width:100%; box-sizing:border-box; padding:10px 14px; border:1px solid var(--line); border-radius:10px; background:var(--paper); color:var(--ink); font-size:14px;">
+        </div>
+        
+        <div id="pwd-error" style="color:var(--pink); font-size:13.5px; margin-bottom:14px; font-weight:600; display:none;"></div>
+        <div id="pwd-success" style="color:var(--good); font-size:13.5px; margin-bottom:14px; font-weight:600; display:none;"></div>
+
+        <button type="submit" id="pwd-submit-btn" class="yt-save-progress-btn" style="width:100%; justify-content:center; padding:12px;">Actualizar contraseña</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cliente API REST Centralizado -->
+  <script src="js/api.js"></script>
+
 <script>
 (function(){
-  var VIDEOS = [
-    "GTAE-9enobE",
-    "BVfEVHRgN80",
-    "PiXd2b528zU",
-    "dM_hH9MyGUM",
-    "ZTivyeO5IBU",
-    "XrkzVxZZID8",
-    "k_rTSxdcMcs",
-    "h8kU7DcH3Wg",
-    "prVqmEdsEis",
-    "9uL8y1vanWk",
-    "Ib2aRTIPCIM"
-  ];
-  var TOTAL = VIDEOS.length;
-
-  var QUESTIONS_MOCK = [
-    ["1. ¿A quién animé esta semana?", "2. ¿Con quién me conecté a través de algo que compartí?"],
-    ["1. ¿Qué don o talento creativo identifico que Dios me ha entregado?", "2. ¿Cómo puedo poner mi creatividad al servicio de una hermana necesitada?"],
-    ["1. ¿De qué manera puedo testificar del amor de Dios usando medios visuales o creativos?", "2. ¿A quién le contaré mi testimonio durante los próximos días?"],
-    ["1. ¿Cómo puedo contribuir a un ambiente de mayor gracia y amor en mi grupo pequeño?", "2. ¿Qué hermana nueva o desanimada puedo invitar a compartir un espacio de comunión?"],
-    ["1. ¿Qué mensaje positivo o bíblico puedo compartir hoy en mis redes o estados?", "2. ¿Con quién me conecté espiritualmente a través de un mensaje digital esta semana?"],
-    ["1. ¿Qué idea sencilla puedo aportar para embellecer el espacio de nuestro Ministerio de la Mujer?", "2. ¿Cómo podemos hacer que una visita se sienta cálidamente recibida en nuestra congregación?"],
-    ["1. ¿Qué experiencia especial viví en mi tiempo devocional u oración creativa?", "2. ¿Por qué hermana o petición específica estuve orando intensamente?"],
-    ["1. ¿Qué acto de servicio solidario puedo planear para bendecir a mi comunidad?", "2. ¿A quién pude servir con alegría esta semana sin esperar nada a cambio?"],
-    ["1. ¿A quién le envié o entregaré una nota de ánimo, tarjeta o versículo inspirador?", "2. ¿Cómo impactó una palabra de esperanza en la vida de una persona a mi alrededor?"],
-    ["1. ¿Qué temática o dinámica creativa me gustaría proponer para el próximo retiro o programa?", "2. ¿De qué forma fomentaremos la integración entre generaciones en nuestros eventos?"],
-    ["1. ¿Cuál ha sido la mayor bendición o lección aprendida a lo largo de este seminario?", "2. ¿Cuál es mi compromiso personal de discipulado creativo de aquí en adelante?"]
+  // Catálogo base de respaldo (offline / inicial)
+  var FALLBACK_MODULOS = [
+    { id: 1, numero: 1, titulo: "Módulo 1: Introducción", descripcion: "Bienvenida al seminario de Discípulas Creativas. Conoce el propósito del curso y los pilares del discipulado creativo.", youtube_id: "GTAE-9enobE", duracion: "Seminario en Video", preguntas: [{ id: 1, orden: 1, enunciado: "1. ¿A quién animé esta semana?" }, { id: 2, orden: 2, enunciado: "2. ¿Con quién me conecté a través de algo que compartí?" }] },
+    { id: 2, numero: 2, titulo: "Módulo 2: Tu Identidad Creativa", descripcion: "Descubre tus talentos y dones creativos dados por Dios para bendecir a tu congregación y comunidad.", youtube_id: "BVfEVHRgN80", duracion: "Seminario en Video", preguntas: [{ id: 3, orden: 1, enunciado: "1. ¿Qué don o talento creativo identifico que Dios me ha entregado?" }, { id: 4, orden: 2, enunciado: "2. ¿Cómo puedo poner mi creatividad al servicio de una hermana necesitada?" }] },
+    { id: 3, numero: 3, titulo: "Módulo 3: El Poder del Testimonio", descripcion: "Cómo compartir tu historia y las maravillas de Dios a través de herramientas y formatos creativos.", youtube_id: "PiXd2b528zU", duracion: "Seminario en Video", preguntas: [{ id: 5, orden: 1, enunciado: "1. ¿De qué manera puedo testificar del amor de Dios usando medios visuales o creativos?" }, { id: 6, orden: 2, enunciado: "2. ¿A quién le contaré mi testimonio durante los próximos días?" }] },
+    { id: 4, numero: 4, titulo: "Módulo 4: Comunidades de Gracia", descripcion: "El papel del discipulado en grupo y cómo fomentar un ambiente de amor, creatividad y fe en tu iglesia.", youtube_id: "dM_hH9MyGUM", duracion: "Seminario en Video", preguntas: [{ id: 7, orden: 1, enunciado: "1. ¿Cómo puedo contribuir a un ambiente de mayor gracia y amor en mi grupo pequeño?" }, { id: 8, orden: 2, enunciado: "2. ¿Qué hermana nueva o desanimada puedo invitar a compartir un espacio de comunión?" }] },
+    { id: 5, numero: 5, titulo: "Módulo 5: Redes que Conectan", descripcion: "Aprende a usar los medios y la comunicación digital con un propósito eterno y un alcance de discipulado.", youtube_id: "ZTivyeO5IBU", duracion: "Seminario en Video", preguntas: [{ id: 9, orden: 1, enunciado: "1. ¿Qué mensaje positivo o bíblico puedo compartir hoy en mis redes o estados?" }, { id: 10, orden: 2, enunciado: "2. ¿Con quién me conecté espiritualmente a través de un mensaje digital esta semana?" }] },
+    { id: 6, numero: 6, titulo: "Módulo 6: Espacios que Inspiran", descripcion: "Ideas prácticas para embellecer y organizar los lugares de reunión y eventos del Ministerio de la Mujer.", youtube_id: "XrkzVxZZID8", duracion: "Seminario en Video", preguntas: [{ id: 11, orden: 1, enunciado: "1. ¿Qué idea sencilla puedo aportar para embellecer el espacio de nuestro Ministerio de la Mujer?" }, { id: 12, orden: 2, enunciado: "2. ¿Cómo podemos hacer que una visita se sienta cálidamente recibida en nuestra congregación?" }] },
+    { id: 7, numero: 7, titulo: "Módulo 7: Oración Creativa", descripcion: "Explora diarios de oración, diarios bíblicos (Bible Journaling) y métodos dinámicos de devoción personal.", youtube_id: "k_rTSxdcMcs", duracion: "Seminario en Video", preguntas: [{ id: 13, orden: 1, enunciado: "1. ¿Qué experiencia especial viví en mi tiempo devocional u oración creativa?" }, { id: 14, orden: 2, enunciado: "2. ¿Por qué hermana o petición específica estuve orando intensamente?" }] },
+    { id: 8, numero: 8, titulo: "Módulo 8: El Arte de Servir", descripcion: "Planificación de proyectos de servicio comunitario que marquen la diferencia e impacten vidas positivamente.", youtube_id: "h8kU7DcH3Wg", duracion: "Seminario en Video", preguntas: [{ id: 15, orden: 1, enunciado: "1. ¿Qué acto de servicio solidario puedo planear para bendecir a mi comunidad?" }, { id: 16, orden: 2, enunciado: "2. ¿A quién pude servir con alegría esta semana sin esperar nada a cambio?" }] },
+    { id: 9, numero: 9, titulo: "Módulo 9: Palabras de Aliento", descripcion: "La escritura, las tarjetas de ánimo y la literatura como puente para alcanzar corazones para Cristo.", youtube_id: "prVqmEdsEis", duracion: "Seminario en Video", preguntas: [{ id: 17, orden: 1, enunciado: "1. ¿A quién le envié o entregaré una nota de ánimo, tarjeta o versículo inspirador?" }, { id: 18, orden: 2, enunciado: "2. ¿Cómo impactó una palabra de esperanza en la vida de una persona a mi alrededor?" }] },
+    { id: 10, numero: 10, titulo: "Módulo 10: Eventos con Propósito", descripcion: "Cómo configurar programas, retiros y seminarios creativos que unan a las hermanas en comunión.", youtube_id: "9uL8y1vanWk", duracion: "Seminario en Video", preguntas: [{ id: 19, orden: 1, enunciado: "1. ¿Qué temática o dinámica creativa me gustaría proponer para el próximo retiro o programa?" }, { id: 20, orden: 2, enunciado: "2. ¿De qué forma fomentaremos la integración entre generaciones en nuestros eventos?" }] },
+    { id: 11, numero: 11, titulo: "Módulo 11: Graduación y Compromiso", descripcion: "Conclusión de tu certificación, compromiso de discipulado creativo y próximos pasos para brillar en tu iglesia.", youtube_id: "Ib2aRTIPCIM", duracion: "Seminario en Video", preguntas: [{ id: 21, orden: 1, enunciado: "1. ¿Cuál ha sido la mayor bendición o lección aprendida a lo largo de este seminario?" }, { id: 22, orden: 2, enunciado: "2. ¿Cuál es mi compromiso personal de discipulado creativo de aquí en adelante?" }] }
   ];
 
   var state = {
-    nombre: '',
-    correo: '',
-    distrito: '',
-    iglesia: '',
-    password: '',
+    usuario: null,
+    modulos: FALLBACK_MODULOS,
     completados: [],
     respuestas: {},
     activeVideoIndex: 0
   };
 
-  var MODULE_DETAILS = [
-    { title: "Módulo 1: Introducción", desc: "Bienvenida al seminario de Discípulas Creativas. Conoce el propósito del curso y los pilares del discipulado creativo." },
-    { title: "Módulo 2: Tu Identidad Creativa", desc: "Descubre tus talentos y dones creativos dados por Dios para bendecir a tu congregación y comunidad." },
-    { title: "Módulo 3: El Poder del Testimonio", desc: "Cómo compartir tu historia y las maravillas de Dios a través de herramientas y formatos creativos." },
-    { title: "Módulo 4: Comunidades de Gracia", desc: "El papel del discipulado en grupo y cómo fomentar un ambiente de amor, creatividad and fe en tu iglesia." },
-    { title: "Módulo 5: Redes que Conectan", desc: "Aprende a usar los medios y la comunicación digital con un propósito eterno y un alcance de discipulado." },
-    { title: "Módulo 6: Espacios que Inspiran", desc: "Ideas prácticas para embellecer y organizar los lugares de reunión y eventos del Ministerio de la Mujer." },
-    { title: "Módulo 7: Oración Creativa", desc: "Explora diarios de oración, diarios bíblicos (Bible Journaling) y métodos dinámicos de devoción personal." },
-    { title: "Módulo 8: El Arte de Servir", desc: "Planificación de proyectos de servicio comunitario que marquen la diferencia e impacten vidas positivamente." },
-    { title: "Módulo 9: Palabras de Aliento", desc: "La escritura, las tarjetas de ánimo y la literatura como puente para alcanzar corazones para Cristo." },
-    { title: "Módulo 10: Eventos con Propósito", desc: "Cómo configurar programas, retiros y seminarios creativos que unan a las hermanas en comunión." },
-    { title: "Módulo 11: Graduación y Compromiso", desc: "Conclusión de tu certificación, compromiso de discipulado creativo y próximos pasos para brillar en tu iglesia." }
-  ];
-
+  // 1. Renderizado Visual del Dashboard
   function renderDashboard() {
-    document.getElementById('yt-modules-greeting').textContent = "¡Hola, " + state.nombre + "!";
-    document.getElementById('yt-user-meta').textContent = "Distrito: " + state.distrito + " · Iglesia: " + state.iglesia;
+    var TOTAL = state.modulos.length;
+    var user = state.usuario || {};
+
+    if (user.nombre) {
+      document.getElementById('yt-modules-greeting').textContent = "¡Hola, " + user.nombre + "!";
+    }
+    if (user.distrito_nombre && user.iglesia_nombre) {
+      document.getElementById('yt-user-meta').textContent = "Distrito: " + user.distrito_nombre + " · Iglesia: " + user.iglesia_nombre;
+    }
 
     var count = state.completados.length;
     document.getElementById('yt-progress-text').textContent = count + " de " + TOTAL + " módulos";
-    document.getElementById('yt-progress-percent').textContent = Math.round((count / TOTAL) * 100) + "%";
-    document.getElementById('yt-progress-fill').style.width = Math.round((count / TOTAL) * 100) + "%";
+    var percent = TOTAL > 0 ? Math.round((count / TOTAL) * 100) : 0;
+    document.getElementById('yt-progress-percent').textContent = percent + "%";
+    document.getElementById('yt-progress-fill').style.width = percent + "%";
 
     document.getElementById('yt-banner-done').style.display = (count >= TOTAL ? "block" : "none");
 
-    var videoId = VIDEOS[state.activeVideoIndex];
+    var currentMod = state.modulos[state.activeVideoIndex];
+    if (!currentMod) return;
+
     var iframe = document.getElementById('yt-iframe');
-    if (!iframe.src || !iframe.src.includes(videoId)) {
-      iframe.src = 'https://www.youtube.com/embed/' + videoId + '?rel=0';
+    if (!iframe.src || !iframe.src.includes(currentMod.youtube_id)) {
+      iframe.src = 'https://www.youtube.com/embed/' + currentMod.youtube_id + '?rel=0';
     }
 
-    document.getElementById('yt-active-title').textContent = MODULE_DETAILS[state.activeVideoIndex].title;
-    document.getElementById('yt-active-desc').textContent = MODULE_DETAILS[state.activeVideoIndex].desc;
+    document.getElementById('yt-active-title').textContent = currentMod.titulo;
+    document.getElementById('yt-active-desc').textContent = currentMod.descripcion;
 
-    var modNum = state.activeVideoIndex + 1;
-    var isDone = state.completados.indexOf(modNum) !== -1;
+    var isDone = state.completados.indexOf(currentMod.id) !== -1;
     var completeBtn = document.getElementById('yt-toggle-complete-btn');
     var completeText = document.getElementById('yt-complete-btn-text');
     if (isDone) {
@@ -200,18 +214,40 @@
       completeText.textContent = 'Marcar como visto';
     }
 
-    // Renderizar preguntas mock del módulo activo
-    var questions = QUESTIONS_MOCK[state.activeVideoIndex] || [
-      "1. ¿A quién animé esta semana?",
-      "2. ¿Con quién me conecté a través de algo que compartí?"
-    ];
-    document.getElementById('yt-q1-label').textContent = questions[0];
-    document.getElementById('yt-q2-label').textContent = questions[1];
+    // Renderizar preguntas de reflexión del módulo activo
+    var questions = currentMod.preguntas || [];
+    var q1Label = document.getElementById('yt-q1-label');
+    var q2Label = document.getElementById('yt-q2-label');
+    var q1Input = document.getElementById('yt-q1-input');
+    var q2Input = document.getElementById('yt-q2-input');
 
-    // Cargar respuestas guardadas previamente para este módulo si existen
-    var savedAnswers = state.respuestas[modNum] || ['', ''];
-    document.getElementById('yt-q1-input').value = savedAnswers[0] || '';
-    document.getElementById('yt-q2-input').value = savedAnswers[1] || '';
+    if (questions.length > 0) {
+      q1Label.textContent = questions[0].enunciado;
+      q1Input.dataset.preguntaId = questions[0].id;
+    }
+    if (questions.length > 1) {
+      q2Label.textContent = questions[1].enunciado;
+      q2Input.dataset.preguntaId = questions[1].id;
+    }
+
+    // Cargar respuestas previamente guardadas si existen
+    var saved = state.respuestas[currentMod.id] || [];
+    var ans1Text = '';
+    var ans2Text = '';
+
+    if (Array.isArray(saved)) {
+      saved.forEach(function(item) {
+        if (questions[0] && item.pregunta_id == questions[0].id) {
+          ans1Text = item.respuesta || item.texto || '';
+        }
+        if (questions[1] && item.pregunta_id == questions[1].id) {
+          ans2Text = item.respuesta || item.texto || '';
+        }
+      });
+    }
+
+    q1Input.value = ans1Text;
+    q2Input.value = ans2Text;
 
     // Actualizar botón "Siguiente módulo"
     var nextModuleBtn = document.getElementById('yt-next-module-btn');
@@ -221,20 +257,21 @@
       nextModuleBtn.style.display = 'inline-flex';
     }
 
+    // Renderizar playlist lateral
     var playlistItems = document.getElementById('yt-playlist-items');
     playlistItems.innerHTML = '';
-    MODULE_DETAILS.forEach(function(mod, i) {
+    state.modulos.forEach(function(mod, i) {
       var n = i + 1;
       var isCurrent = (i === state.activeVideoIndex);
-      var itemDone = state.completados.indexOf(n) !== -1;
+      var itemDone = state.completados.indexOf(mod.id) !== -1;
 
       var item = document.createElement('div');
       item.className = 'yt-playlist-item' + (isCurrent ? ' active' : '');
       item.innerHTML =
         '<div class="yt-item-num">' + (isCurrent ? '▶' : (n < 10 ? '0' + n : n)) + '</div>' +
         '<div class="yt-item-info">' +
-          '<div class="yt-item-title">' + mod.title + '</div>' +
-          '<div class="yt-item-duration">Seminario en Video</div>' +
+          '<div class="yt-item-title">' + mod.titulo + '</div>' +
+          '<div class="yt-item-duration">' + (mod.duracion || 'Seminario en Video') + '</div>' +
         '</div>' +
         '<div class="yt-item-status">' +
           (itemDone ? '<div class="yt-badge-complete">✓</div>' : '') +
@@ -253,7 +290,7 @@
   function scrollToPlayer() {
     var player = document.querySelector('.yt-player-col');
     if (player) {
-      var headerOffset = 75; // Compensación por el header sticky
+      var headerOffset = 75;
       var elementPosition = player.getBoundingClientRect().top;
       var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
       window.scrollTo({
@@ -265,8 +302,9 @@
 
   function selectFirstIncomplete() {
     var firstIncomplete = 0;
-    for (var idx = 0; idx < TOTAL; idx++) {
-      if (state.completados.indexOf(idx + 1) === -1) {
+    for (var idx = 0; idx < state.modulos.length; idx++) {
+      var mod = state.modulos[idx];
+      if (state.completados.indexOf(mod.id) === -1) {
         firstIncomplete = idx;
         break;
       }
@@ -274,110 +312,225 @@
     state.activeVideoIndex = firstIncomplete;
   }
 
-  function persist(){
-    try{
-      if (state.correo) {
-        var userKey = 'dc-user-' + state.correo.toLowerCase();
-        var userData = {
-          nombre: state.nombre,
-          correo: state.correo,
-          distrito: state.distrito,
-          iglesia: state.iglesia,
-          password: state.password,
-          completados: state.completados,
-          respuestas: state.respuestas,
-          actualizadoEn: new Date().toISOString()
-        };
-        localStorage.setItem(userKey, JSON.stringify(userData));
-        localStorage.setItem('dc-active-session', state.correo);
-      }
-    }catch(err){}
-  }
-
-  // Botón superior simple "Marcar como visto"
+  // 2. Alternar Marcado Rápido ("Marcar como visto")
   var toggleCompleteBtn = document.getElementById('yt-toggle-complete-btn');
-  toggleCompleteBtn.addEventListener('click', function() {
-    var n = state.activeVideoIndex + 1;
-    var idx = state.completados.indexOf(n);
-    if (idx === -1) {
-      state.completados.push(n);
-    } else {
-      state.completados.splice(idx, 1);
+  toggleCompleteBtn.addEventListener('click', async function() {
+    var currentMod = state.modulos[state.activeVideoIndex];
+    if (!currentMod) return;
+
+    var isDone = state.completados.indexOf(currentMod.id) !== -1;
+    var nuevoEstado = !isDone;
+
+    try {
+      toggleCompleteBtn.disabled = true;
+      var res = await DC_API.toggleModulo(currentMod.id, nuevoEstado);
+      if (res && res.data && res.data.completados_ids) {
+        state.completados = res.data.completados_ids;
+      } else {
+        if (nuevoEstado) {
+          if (state.completados.indexOf(currentMod.id) === -1) state.completados.push(currentMod.id);
+        } else {
+          var idx = state.completados.indexOf(currentMod.id);
+          if (idx !== -1) state.completados.splice(idx, 1);
+        }
+      }
+      renderDashboard();
+    } catch(err) {
+      console.warn('Error al alternar estado en API:', err);
+    } finally {
+      toggleCompleteBtn.disabled = false;
     }
-    persist();
-    renderDashboard();
   });
 
-  // Botón "Guardar progreso" (guarda respuestas de reflexión y marca visto)
+  // 3. Guardar Respuestas de Reflexión y Completar Módulo
   var saveProgressBtn = document.getElementById('yt-save-progress-btn');
   var saveFeedback = document.getElementById('yt-save-feedback');
-  saveProgressBtn.addEventListener('click', function() {
-    var modNum = state.activeVideoIndex + 1;
-    var ans1 = document.getElementById('yt-q1-input').value.trim();
-    var ans2 = document.getElementById('yt-q2-input').value.trim();
+  saveProgressBtn.addEventListener('click', async function() {
+    var currentMod = state.modulos[state.activeVideoIndex];
+    if (!currentMod) return;
 
-    state.respuestas[modNum] = [ans1, ans2];
+    var q1Input = document.getElementById('yt-q1-input');
+    var q2Input = document.getElementById('yt-q2-input');
+    var ans1 = q1Input.value.trim();
+    var ans2 = q2Input.value.trim();
 
-    if (state.completados.indexOf(modNum) === -1) {
-      state.completados.push(modNum);
+    var respuestasPayload = [];
+    if (q1Input.dataset.preguntaId) {
+      respuestasPayload.push({ pregunta_id: parseInt(q1Input.dataset.preguntaId, 10), texto: ans1 });
+    }
+    if (q2Input.dataset.preguntaId) {
+      respuestasPayload.push({ pregunta_id: parseInt(q2Input.dataset.preguntaId, 10), texto: ans2 });
     }
 
-    persist();
-    renderDashboard();
+    try {
+      saveProgressBtn.disabled = true;
+      saveProgressBtn.textContent = 'Guardando…';
 
-    // Feedback visual
-    saveFeedback.style.display = 'inline-flex';
-    setTimeout(function() {
-      saveFeedback.style.display = 'none';
-    }, 3500);
+      var res = await DC_API.completarModulo(currentMod.id, respuestasPayload);
+
+      if (res && res.data) {
+        if (res.data.completados_ids) state.completados = res.data.completados_ids;
+        if (res.data.respuestas) state.respuestas = res.data.respuestas;
+      } else {
+        if (state.completados.indexOf(currentMod.id) === -1) state.completados.push(currentMod.id);
+      }
+
+      renderDashboard();
+
+      // Feedback visual
+      saveFeedback.style.display = 'inline-flex';
+      setTimeout(function() {
+        saveFeedback.style.display = 'none';
+      }, 3500);
+    } catch(err) {
+      alert(err.message || 'Error al guardar el progreso.');
+    } finally {
+      saveProgressBtn.disabled = false;
+      saveProgressBtn.textContent = 'Guardar progreso';
+    }
   });
 
-  // Botón "Siguiente módulo"
+  // 4. Botón "Siguiente módulo"
   var nextModuleBtn = document.getElementById('yt-next-module-btn');
   nextModuleBtn.addEventListener('click', function() {
-    if (state.activeVideoIndex < TOTAL - 1) {
+    if (state.activeVideoIndex < state.modulos.length - 1) {
       state.activeVideoIndex++;
       renderDashboard();
       scrollToPlayer();
     }
   });
 
-  // Cerrar sesión
+  // 5. Cerrar Sesión
   var ytLogoutBtn = document.getElementById('yt-logout-btn');
-  ytLogoutBtn.addEventListener('click', function(e) {
+  ytLogoutBtn.addEventListener('click', async function(e) {
     e.preventDefault();
-    try {
-      localStorage.removeItem('dc-active-session');
-    } catch(err){}
-    window.location.href = 'index.html';
-  });
-
-  // Validar y restaurar sesión activa al cargar la página
-  try {
-    var activeEmail = localStorage.getItem('dc-active-session');
-    if (activeEmail) {
-      var rawUser = localStorage.getItem('dc-user-' + activeEmail.toLowerCase());
-      if (rawUser) {
-        var user = JSON.parse(rawUser);
-        state.nombre = user.nombre;
-        state.correo = user.correo;
-        state.distrito = user.distrito;
-        state.iglesia = user.iglesia;
-        state.password = user.password;
-        state.completados = Array.isArray(user.completados) ? user.completados : [];
-        state.respuestas = (typeof user.respuestas === 'object' && user.respuestas !== null) ? user.respuestas : {};
-
-        selectFirstIncomplete();
-        renderDashboard();
-      } else {
-        window.location.href = 'index.html';
-      }
-    } else {
+    if (confirm('¿Deseas cerrar tu sesión?')) {
+      await DC_API.logout();
       window.location.href = 'index.html';
     }
-  } catch(err){
-    window.location.href = 'index.html';
+  });
+
+  // 6. Modal de Cambio de Contraseña
+  var passwordModal = document.getElementById('password-modal');
+  var passwordBtn = document.getElementById('yt-password-btn');
+  var modalClose = document.getElementById('modal-pwd-close');
+  var passwordForm = document.getElementById('password-change-form');
+  var pwdError = document.getElementById('pwd-error');
+  var pwdSuccess = document.getElementById('pwd-success');
+  var pwdSubmitBtn = document.getElementById('pwd-submit-btn');
+
+  function openPasswordModal() {
+    pwdError.style.display = 'none';
+    pwdSuccess.style.display = 'none';
+    passwordForm.reset();
+    passwordModal.style.display = 'flex';
+    setTimeout(function(){ passwordModal.classList.add('active'); }, 10);
   }
+
+  function closePasswordModal() {
+    passwordModal.classList.remove('active');
+    setTimeout(function(){ passwordModal.style.display = 'none'; }, 250);
+  }
+
+  passwordBtn.addEventListener('click', openPasswordModal);
+  modalClose.addEventListener('click', closePasswordModal);
+  passwordModal.addEventListener('click', function(e) {
+    if (e.target === passwordModal) closePasswordModal();
+  });
+
+  passwordForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    pwdError.style.display = 'none';
+    pwdSuccess.style.display = 'none';
+
+    var actual = document.getElementById('pwd-actual').value;
+    var nueva = document.getElementById('pwd-nueva').value;
+    var confirm = document.getElementById('pwd-confirm').value;
+
+    if (!actual || !nueva || !confirm) {
+      pwdError.textContent = 'Todos los campos son obligatorios.';
+      pwdError.style.display = 'block';
+      return;
+    }
+
+    if (nueva !== confirm) {
+      pwdError.textContent = 'La nueva contraseña y su confirmación no coinciden.';
+      pwdError.style.display = 'block';
+      return;
+    }
+
+    if (nueva.length < 6) {
+      pwdError.textContent = 'La nueva contraseña debe tener mínimo 6 caracteres.';
+      pwdError.style.display = 'block';
+      return;
+    }
+
+    try {
+      pwdSubmitBtn.disabled = true;
+      pwdSubmitBtn.textContent = 'Actualizando…';
+
+      var res = await DC_API.changePassword(actual, nueva);
+      pwdSuccess.textContent = res.message || '✓ ¡Tu contraseña ha sido actualizada con éxito!';
+      pwdSuccess.style.display = 'block';
+
+      setTimeout(function() {
+        closePasswordModal();
+      }, 2000);
+    } catch(err) {
+      pwdError.textContent = err.message || 'Error al actualizar contraseña. Verifica tu clave actual.';
+      pwdError.style.display = 'block';
+    } finally {
+      pwdSubmitBtn.disabled = false;
+      pwdSubmitBtn.textContent = 'Actualizar contraseña';
+    }
+  });
+
+  // 7. Inicialización de Sesión y Datos
+  async function init() {
+    var token = DC_API.storage.getToken();
+    if (!token) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // A. Obtener datos de perfil
+    try {
+      var meRes = await DC_API.getMe();
+      if (meRes && meRes.data) {
+        state.usuario = meRes.data;
+      }
+    } catch(authErr) {
+      console.warn('Sesión no autorizada, redirigiendo.');
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // B. Cargar catálogo de módulos desde el backend
+    try {
+      var modRes = await DC_API.getModulos();
+      if (modRes && modRes.data && modRes.data.length > 0) {
+        state.modulos = modRes.data;
+      }
+    } catch(modErr) {
+      console.warn('Usando catálogo local de módulos.');
+    }
+
+    // C. Cargar progreso y respuestas guardadas de la alumna
+    try {
+      var progRes = await DC_API.getProgreso();
+      if (progRes && progRes.data) {
+        state.completados = progRes.data.completados_ids || [];
+        state.respuestas = progRes.data.respuestas || {};
+      }
+    } catch(progErr) {
+      console.warn('Error al cargar progreso remoto.');
+    }
+
+    selectFirstIncomplete();
+    renderDashboard();
+  }
+
+  init();
 
 })();
 </script>

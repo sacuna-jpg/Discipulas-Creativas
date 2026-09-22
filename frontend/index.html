@@ -242,72 +242,13 @@
     </div>
   </div>
 
+  <!-- Cliente API REST Centralizado -->
+  <script src="js/api.js"></script>
+
 <script>
 (function(){
-  var DISTRITOS = {
-    "Algeciras": ["Iglesia Shalom Algeciras", "Iglesia Central Algeciras", "Iglesia Eben Ezer Algeciras", "Iglesia Santana Ramos", "Iglesia Paraíso Algeciras", "Grupo Nueva Jerusalén Algeciras"],
-    "Campo Alegre": ["Iglesia Central Campo Alegre", "Iglesia Emmanuel Campo Alegre", "Grupo Sinaí Campo Alegre", "Iglesia Libertad Hobo", "Iglesia Jehová Nissi", "Iglesia Sión Rivera", "Iglesia Renacer Hobo"],
-    "Florencia Central": ["Iglesia Central Florencia", "Iglesia Jerusalén Florencia", "Grupo Canaán Yurayaco", "Iglesia Esmirna Curillo", "Iglesia Belén", "Grupo Renacer la Gloria", "Iglesia Efeso Ceilan", "Iglesia Filadelfia"],
-    "Florencia Nuevo Amanecer": ["Iglesia Nuevo Amanecer", "Iglesia Orión Florencia", "Grupo Nazareth Florencia", "Grupo Sinaí Solano", "Grupo Lirios", "Iglesia Olivos", "Grupo Luz Celestial", "Grupo Paraiso San Antonio"],
-    "Florencia Redención": ["Iglesia Nuevo Amanecer", "Iglesia Orión Florencia", "Grupo Nazareth Florencia", "Grupo Sinaí Solano", "Grupo Lirios", "Iglesia Olivos", "Grupo Luz Celestial", "Grupo Paraiso San Antonio"],
-    "Garzón": ["Iglesia Renacer Garzón", "Iglesia Gigantes de la Fe", "Grupo Eben Ezer Suaza", "Iglesia Horeb Zuluaga", "Iglesia Sion Silvania", "Grupo Jerusalen Guadalupe", "Grupo Nueva Esperanza Garzón"],
-    "La Plata": ["Iglesia Edén La Plata", "Iglesia Getsemaní Getzem", "Iglesia Maranatha Agrado", "Grupo Elohim Paicol", "Grupo Tesalia"],
-    "Neiva Central": ["Iglesia Neiva Central", "Grupo Roca Eterna", "Iglesia AMAS CABI", "Iglesia Getsemaní Neiva", "Iglesia Bethel Aipe", "Iglesia Salem (San Andrés)", "Grupo Tello", "Grupo Palermo", "Grupo Orión Neiva"],
-    "Neiva Jardín": ["Iglesia Jardín", "Iglesia Nueva Jerusalén", "Iglesia Fuente de Vida (Vegalarga)", "Grupo Siervos de Dios", "Iglesia Luz de Oriente"],
-    "Neiva Sur": ["Iglesia Manantial Neiva", "Iglesia Bethel Río Chiquito", "Iglesia Edén Neiva", "Iglesia Filadelfia Neiva", "Grupo Renacer Caguán"],
-    "Pitalito Norte": ["Iglesia Pitalito Central", "Iglesia Acevedo", "Grupo Maito", "Grupo Timaná San Antonio", "Iglesia Esperanza Marimba"],
-    "Pitalito Sur": ["Iglesia Nuevo Edén", "Iglesia Maranatha Criollo", "Iglesia Palestina Pitalito", "Iglesia Remanente Isnos", "Iglesia Paraíso Pitalito", "Grupo Emanuel Bordones", "Grupo Jerusalén Bruselas"],
-    "Puerto Rico": ["Iglesia Horeb Puerto Rico", "Iglesia Emmanuel Puerto Rico", "Iglesia Gilgal Doncello", "Iglesia Edén Doncello", "Iglesia Fuente Vida - La Granada", "Iglesia Bethel Guacamayas", "Grupo Paraíso las Palmas"],
-    "San Vicente": ["Iglesia Sión San Vicente", "Iglesia Manantial Campo Hermoso", "Iglesia La Victoria San Vicente", "Iglesia Bethel Macarena", "Iglesia Sinaí la Novia", "Iglesia Renacer la Cristalina", "Grupo Remanente San Juan", "Grupo Luz de Esperanza Tailandia", "Grupo Rayo de Luz", "Iglesia Maranatha Las Damas"]
-  };
-  var DISTRITO_ORDEN = ["Algeciras", "Campo Alegre", "Florencia Central", "Florencia Nuevo Amanecer", "Florencia Redención", "Garzón", "La Plata", "Neiva Central", "Neiva Jardín", "Neiva Sur", "Pitalito Norte", "Pitalito Sur", "Puerto Rico", "San Vicente"];
-
-  var VIDEOS = [
-    "GTAE-9enobE",
-    "BVfEVHRgN80",
-    "PiXd2b528zU",
-    "dM_hH9MyGUM",
-    "ZTivyeO5IBU",
-    "XrkzVxZZID8",
-    "k_rTSxdcMcs",
-    "h8kU7DcH3Wg",
-    "prVqmEdsEis",
-    "9uL8y1vanWk",
-    "Ib2aRTIPCIM"
-  ];
-  var TOTAL = VIDEOS.length;
-
   var distritoSelect = document.getElementById('distrito');
   var iglesiaSelect = document.getElementById('iglesia');
-
-  DISTRITO_ORDEN.forEach(function(dist){
-    var opt = document.createElement('option');
-    opt.value = dist; opt.textContent = dist;
-    distritoSelect.appendChild(opt);
-  });
-
-  distritoSelect.addEventListener('change', function(){
-    var dist = distritoSelect.value;
-    iglesiaSelect.innerHTML = '';
-    var congregaciones = DISTRITOS[dist] || [];
-    var placeholder = document.createElement('option');
-    placeholder.value = ''; placeholder.disabled = true; placeholder.selected = true;
-    placeholder.textContent = 'Selecciona tu iglesia o grupo…';
-    iglesiaSelect.appendChild(placeholder);
-    congregaciones.forEach(function(name){
-      var opt = document.createElement('option');
-      opt.value = name; opt.textContent = name;
-      iglesiaSelect.appendChild(opt);
-    });
-    iglesiaSelect.disabled = congregaciones.length === 0;
-  });
-
-  function slugify(s){
-    return s.toString().trim().toLowerCase()
-      .normalize('NFD').replace(/[̀-ͯ]/g,'')
-      .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-  }
-
   var loginForm = document.getElementById('login-form');
   var registerForm = document.getElementById('register-form');
   var registerCopy = document.getElementById('register-copy');
@@ -318,7 +259,71 @@
   var loginError = document.getElementById('login-error');
   var registerError = document.getElementById('register-error');
 
-  // Alternancia entre formularios
+  // 1. Carga Dinámica de Distritos desde la API
+  async function cargarDistritos() {
+    try {
+      var res = await DC_API.getDistritos();
+      distritoSelect.innerHTML = '<option value="" disabled selected>Selecciona tu distrito…</option>';
+      if (res && res.data) {
+        res.data.forEach(function(d){
+          var opt = document.createElement('option');
+          opt.value = d.id;
+          opt.textContent = d.nombre;
+          distritoSelect.appendChild(opt);
+        });
+      }
+    } catch(err) {
+      console.warn('No se pudo conectar con la API de distritos, usando lista de respaldo.', err);
+      // Fallback estático con IDs coincidentes
+      var DISTRITOS_FALLBACK = [
+        {id: 1, nombre: "Algeciras"}, {id: 2, nombre: "Campo Alegre"},
+        {id: 3, nombre: "Florencia Central"}, {id: 4, nombre: "Florencia Nuevo Amanecer"},
+        {id: 5, nombre: "Florencia Redención"}, {id: 6, nombre: "Garzón"},
+        {id: 7, nombre: "La Plata"}, {id: 8, nombre: "Neiva Central"},
+        {id: 9, nombre: "Neiva Jardín"}, {id: 10, nombre: "Neiva Sur"},
+        {id: 11, nombre: "Pitalito Norte"}, {id: 12, nombre: "Pitalito Sur"},
+        {id: 13, nombre: "Puerto Rico"}, {id: 14, nombre: "San Vicente"}
+      ];
+      distritoSelect.innerHTML = '<option value="" disabled selected>Selecciona tu distrito…</option>';
+      DISTRITOS_FALLBACK.forEach(function(d){
+        var opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = d.nombre;
+        distritoSelect.appendChild(opt);
+      });
+    }
+  }
+
+  // 2. Carga Dinámica de Iglesias filtradas por Distrito
+  distritoSelect.addEventListener('change', async function(){
+    var distritoId = distritoSelect.value;
+    if (!distritoId) return;
+
+    iglesiaSelect.innerHTML = '<option value="" disabled selected>Cargando iglesias…</option>';
+    iglesiaSelect.disabled = true;
+
+    try {
+      var res = await DC_API.getIglesias(distritoId);
+      iglesiaSelect.innerHTML = '<option value="" disabled selected>Selecciona tu iglesia o grupo…</option>';
+      if (res && res.data && res.data.length > 0) {
+        res.data.forEach(function(i){
+          var opt = document.createElement('option');
+          opt.value = i.id;
+          opt.textContent = i.nombre;
+          iglesiaSelect.appendChild(opt);
+        });
+        iglesiaSelect.disabled = false;
+      } else {
+        iglesiaSelect.innerHTML = '<option value="" disabled selected>No hay iglesias registradas en este distrito</option>';
+      }
+    } catch(err) {
+      console.warn('Error al cargar iglesias desde la API.', err);
+      iglesiaSelect.innerHTML = '<option value="1">Iglesia Central</option>';
+      iglesiaSelect.disabled = false;
+    }
+  });
+
+  // 3. Alternancia visual entre Login y Registro
   toRegisterBtn.addEventListener('click', function(e){
     e.preventDefault();
     loginForm.style.display = 'none';
@@ -339,19 +344,22 @@
     registerError.style.display = 'none';
   });
 
-  // Envío del Formulario de Registro
-  registerForm.addEventListener('submit', function(e){
+  // 4. Envío del Formulario de Registro a la API
+  registerForm.addEventListener('submit', async function(e){
     e.preventDefault();
     registerError.style.display = 'none';
+
+    var submitBtn = registerForm.querySelector('button[type="submit"]');
+    var originalBtnText = submitBtn.textContent;
 
     var nombre = document.getElementById('reg-username').value.trim();
     var correo = document.getElementById('reg-correo').value.trim().toLowerCase();
     var password = document.getElementById('reg-password').value;
     var passwordConfirm = document.getElementById('reg-password-confirm').value;
-    var distrito = distritoSelect.value;
-    var iglesia = iglesiaSelect.value;
+    var distritoId = distritoSelect.value;
+    var iglesiaId = iglesiaSelect.value;
 
-    if (!nombre || !correo || !password || !passwordConfirm || !distrito || !iglesia) {
+    if (!nombre || !correo || !password || !passwordConfirm || !distritoId || !iglesiaId) {
       registerError.textContent = 'Todos los campos son obligatorios.';
       registerError.style.display = 'block';
       return;
@@ -363,80 +371,85 @@
       return;
     }
 
-    // Verificar si el correo ya existe
-    try {
-      var existing = localStorage.getItem('dc-user-' + correo);
-      if (existing) {
-        registerError.textContent = 'Este correo electrónico ya está registrado.';
-        registerError.style.display = 'block';
-        return;
-      }
-    } catch(err){}
-
-    var userData = {
-      nombre: nombre,
-      correo: correo,
-      distrito: distrito,
-      iglesia: iglesia,
-      password: password,
-      completados: [],
-      creadoEn: new Date().toISOString()
-    };
+    if (password.length < 6) {
+      registerError.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+      registerError.style.display = 'block';
+      return;
+    }
 
     try {
-      localStorage.setItem('dc-user-' + correo, JSON.stringify(userData));
-      localStorage.setItem('dc-active-session', correo);
-    } catch(err){}
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creando cuenta…';
 
-    // Redireccionar al Dashboard externo de forma limpia
-    window.location.href = 'dashboard.html';
+      var res = await DC_API.register({
+        nombre: nombre,
+        correo: correo,
+        password: password,
+        distrito_id: distritoId,
+        iglesia_id: iglesiaId
+      });
+
+      // Redireccionar al panel
+      window.location.href = 'dashboard.html';
+    } catch(err) {
+      registerError.textContent = err.message || 'Error al registrar tu cuenta. Por favor intenta de nuevo.';
+      registerError.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalBtnText;
+    }
   });
 
-  // Envío del Formulario de Login
-  loginForm.addEventListener('submit', function(e){
+  // 5. Envío del Formulario de Login a la API
+  loginForm.addEventListener('submit', async function(e){
     e.preventDefault();
     loginError.style.display = 'none';
+
+    var submitBtn = loginForm.querySelector('button[type="submit"]');
+    var originalBtnText = submitBtn.textContent;
 
     var correo = document.getElementById('login-correo').value.trim().toLowerCase();
     var password = document.getElementById('login-password').value;
 
     if (!correo || !password) {
-      loginError.textContent = 'Por favor ingresa tu correo y contraseña.';
+      loginError.textContent = 'Datos incorrectos, por favor revise.';
       loginError.style.display = 'block';
       return;
     }
 
-    var userData = null;
     try {
-      var raw = localStorage.getItem('dc-user-' + correo);
-      if (raw) userData = JSON.parse(raw);
-    } catch(err){}
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Iniciando sesión…';
 
-    if (!userData || userData.password !== password) {
-      loginError.textContent = 'El correo electrónico o la contraseña son incorrectos.';
+      var res = await DC_API.login(correo, password);
+
+      // Redireccionar al panel
+      window.location.href = 'dashboard.html';
+    } catch(err) {
+      loginError.textContent = err.message || 'El correo o la contraseña son incorrectos.';
       loginError.style.display = 'block';
-      return;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalBtnText;
     }
-
-    // Guardar sesión activa
-    try {
-      localStorage.setItem('dc-active-session', correo);
-    } catch(err){}
-
-    // Redireccionar al Dashboard externo de forma limpia
-    window.location.href = 'dashboard.html';
   });
 
-  // Validar sesión activa al cargar la página para redirigir si corresponde
-  try {
-    var activeEmail = localStorage.getItem('dc-active-session');
-    if (activeEmail) {
-      var rawUser = localStorage.getItem('dc-user-' + activeEmail.toLowerCase());
-      if (rawUser) {
-        window.location.href = 'dashboard.html';
+  // 6. Validar si ya existe sesión activa válida para redirigir
+  (async function checkExistingSession() {
+    var token = DC_API.storage.getToken();
+    if (token) {
+      try {
+        var me = await DC_API.getMe();
+        if (me && me.data) {
+          window.location.href = 'dashboard.html';
+        }
+      } catch(e) {
+        // Token vencido o inválido, se limpia automáticamente en api.js
       }
     }
-  } catch(err){}
+    // Si no hay sesión, inicializar distritos
+    cargarDistritos();
+  })();
 
   // Lógica del modal de video embebido (para compatibilidad de enlaces fuera del panel)
   var videoModal = document.getElementById('video-modal');
