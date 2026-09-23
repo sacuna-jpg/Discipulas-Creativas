@@ -16,7 +16,9 @@ function handleCors() {
         'http://localhost',
         'https://localhost',
         'http://127.0.0.1',
-        'https://127.0.0.1'
+        'https://127.0.0.1',
+        'http://apidc.xo.je',
+        'https://apidc.xo.je'
     ];
 
     $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
@@ -40,7 +42,17 @@ function handleCors() {
         $isAllowed = true;
     } 
     // 2. Verificación de host base (útil para GitHub Pages o localhost con cualquier puerto ej: 3000, 5500, 8080)
-    elseif (in_array($originBase, $allowedOrigins, true) || $originHost === 'localhost' || $originHost === '127.0.0.1') {
+    elseif (
+        in_array($originBase, $allowedOrigins, true) || 
+        $originHost === 'localhost' || 
+        $originHost === '127.0.0.1' ||
+        $originHost === ($_SERVER['HTTP_HOST'] ?? '') ||
+        str_ends_with($originHost, '.github.io') ||
+        str_ends_with($originHost, '.infinityfreeapp.com') ||
+        str_ends_with($originHost, '.epizy.com') ||
+        str_ends_with($originHost, '.rf.gd') ||
+        str_ends_with($originHost, '.xo.je')
+    ) {
         $isAllowed = true;
     }
 
