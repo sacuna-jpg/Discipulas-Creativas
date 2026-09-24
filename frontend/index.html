@@ -126,15 +126,15 @@
     <div class="register-wrap" id="register-wrap">
       <div class="register-copy" id="register-copy">
         <h3 id="copy-title" style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:4px;">¡Bienvenida!</h3>
-        <p id="copy-desc">Inicia sesión con tu correo y contraseña para ver tu avance en el seminario. Si es tu primera vez, haz clic en registrarse para crear tu cuenta.</p>
+        <p id="copy-desc">Inicia sesión con tu correo o número de celular y contraseña para ver tu avance en el seminario. Si es tu primera vez, haz clic en registrarse para crear tu cuenta.</p>
       </div>
 
       <div class="card" id="register-card">
         <!-- Formulario de Login -->
         <form id="login-form">
           <div class="field">
-            <label for="login-correo">Correo electrónico</label>
-            <input id="login-correo" name="correo" type="email" autocomplete="email" required placeholder="Ej. maria@correo.com">
+            <label for="login-correo">Correo electrónico o celular</label>
+            <input id="login-correo" name="correo" type="text" autocomplete="username" required placeholder="Ej. maria@correo.com o 3123456789">
           </div>
           <div class="field">
             <label for="login-password">Contraseña</label>
@@ -150,12 +150,12 @@
         <!-- Formulario de Registro -->
         <form id="register-form" style="display:none;">
           <div class="field">
-            <label for="reg-username">Nombre de usuario</label>
-            <input id="reg-username" name="username" type="text" autocomplete="username" required placeholder="Ej. María Fernanda">
+            <label for="reg-username">Nombre completo</label>
+            <input id="reg-username" name="username" type="text" autocomplete="name" required placeholder="Ej. María Fernanda Pérez">
           </div>
           <div class="field">
-            <label for="reg-correo">Correo electrónico</label>
-            <input id="reg-correo" name="correo" type="email" autocomplete="email" required placeholder="Ej. maria@correo.com">
+            <label for="reg-correo">Correo electrónico o celular (WhatsApp)</label>
+            <input id="reg-correo" name="correo" type="text" autocomplete="username" required placeholder="Ej. maria@correo.com o 3123456789">
           </div>
           <div class="field">
             <label for="reg-password">Contraseña</label>
