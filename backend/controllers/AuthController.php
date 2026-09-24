@@ -23,18 +23,26 @@ class AuthController {
             Response::unprocessable('El nombre completo es obligatorio.', 'NAME_REQUIRED');
         }
 
-        if (empty($correo) || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-            Response::unprocessable('Debes ingresar un correo electrónico válido.', 'INVALID_EMAIL');
+        // Determinar si es correo electrónico o número de celular
+        $isEmail = filter_var($correo, FILTER_VALIDATE_EMAIL);
+        $cleanPhone = preg_replace('/[^0-9+]/', '', $correo);
+        $isPhone = (preg_match('/^\+?[0-9]{7,15}$/', $cleanPhone) === 1);
+
+        if (!$isEmail && !$isPhone) {
+            Response::unprocessable('Debes ingresar un correo electrónico o número de celular válido.', 'INVALID_IDENTIFIER');
         }
+
+        // Si es teléfono guardar normalizado, si es correo en minúsculas
+        $correo = $isEmail ? strtolower($correo) : $cleanPhone;
 
         if (strlen($password) < 6) {
             Response::unprocessable('La contraseña debe tener al menos 6 caracteres.', 'PASSWORD_TOO_SHORT');
         }
 
-        // Verificar si el correo ya está registrado
+        // Verificar si el identificador ya está registrado
         $existente = Usuario::findByEmail($correo);
         if ($existente) {
-            Response::unprocessable('El correo electrónico ya se encuentra registrado. Por favor inicia sesión.', 'EMAIL_ALREADY_EXISTS');
+            Response::unprocessable('Este correo o número de celular ya se encuentra registrado. Por favor inicia sesión.', 'IDENTIFIER_ALREADY_EXISTS');
         }
 
         // Crear usuaria
@@ -54,11 +62,18 @@ class AuthController {
     }
 
     public function login(Request $request) {
-        $correo = trim($request->input('correo', ''));
+        $identificador = trim($request->input('correo', ''));
         $password = $request->input('password', '');
 
-        if (empty($correo) || empty($password)) {
+        if (empty($identificador) || empty($password)) {
             Response::badRequest('Datos incorrectos, por favor revise.', 'CREDENTIALS_REQUIRED');
+        }
+
+        // Normalizar según si es email o teléfono
+        if (strpos($identificador, '@') !== false) {
+            $correo = strtolower($identificador);
+        } else {
+            $correo = preg_replace('/[^0-9+]/', '', $identificador);
         }
 
         $usuario = Usuario::findByEmail($correo);
